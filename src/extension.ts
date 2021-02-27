@@ -1,26 +1,33 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import { JSONTable } from './jsonTable';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+	context.subscriptions.push(
+		vscode.commands.registerCommand('json-table-viewer.OpenView', () => {
+			let activeTextEditor = vscode.window.activeTextEditor;
+			if (activeTextEditor) {
+				try {
+					let json = new JSONTable(activeTextEditor.document.getText());
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "json-table-viewer" is now active!');
+					const panel = vscode.window.createWebviewPanel(
+						'json-table-viewer',
+						'JSON Table Viewer',
+						vscode.ViewColumn.One,
+						{}
+					);
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('json-table-viewer.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from JSON Table Viewer!');
-	});
-
-	context.subscriptions.push(disposable);
+					panel.webview.html = json.getHTML();
+					// console.log(json.getHTML());
+				} catch (e) {
+					vscode.window.showErrorMessage(e.toString());
+				}
+			}
+		})
+	);
 }
 
 // this method is called when your extension is deactivated

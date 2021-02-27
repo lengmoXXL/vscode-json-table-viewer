@@ -10,7 +10,8 @@
 		"Other"
 	],
 	"activationEvents": [
-        "onCommand:json-table-viewer.helloWorld"
+        "onCommand:json-table-viewer.helloWorld",
+		"onCommand:json-table-viewer.OpenView"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -18,6 +19,10 @@
 			{
 				"command": "json-table-viewer.helloWorld",
 				"title": "Hello World"
+			},
+			{
+				"command": "json-table-viewer.OpenView",
+				"title": "JSON Table Viewer: Open View"
 			}
 		]
 	},
