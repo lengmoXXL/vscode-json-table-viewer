@@ -2,6 +2,7 @@
 	"name": "json-table-viewer",
 	"displayName": "JSON Table Viewer",
 	"description": "View JSON as Nested Table",
+	"publisher": "lengmo",
 	"version": "0.0.1",
 	"engines": {
 		"vscode": "^1.53.0"
@@ -10,16 +11,11 @@
 		"Other"
 	],
 	"activationEvents": [
-        "onCommand:json-table-viewer.helloWorld",
 		"onCommand:json-table-viewer.OpenView"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
-			{
-				"command": "json-table-viewer.helloWorld",
-				"title": "Hello World"
-			},
 			{
 				"command": "json-table-viewer.OpenView",
 				"title": "JSON Table Viewer: Open View"
@@ -46,5 +42,15 @@
 		"mocha": "^7.1.2",
 		"typescript": "^3.8.3",
 		"vscode-test": "^1.3.0"
-	}
+	},
+	"icon": "icon.png",
+	"bugs": {
+		"url": "https://github.com/lengmoXXL/vscode-json-table-viewer/issues",
+		"email": "forlearn_lzy@163.com"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/lengmoXXL/vscode-json-table-viewer"
+	},
+	"homepage": "https://github.com/lengmoXXL/vscode-json-table-viewer/raw/main/README.md"
 }

@@ -1,7 +1,6 @@
 # json-table-viewer README
 
-![tutorial](./yuqueCli.gif)
-
+![tutorial](https://github.com/lengmoXXL/vscode-json-table-viewer/raw/main/yuqueCli.gif)
 
 ## Features
 
