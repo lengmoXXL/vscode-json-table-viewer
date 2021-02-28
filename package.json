@@ -3,7 +3,7 @@
 	"displayName": "JSON Table Viewer",
 	"description": "View JSON as Nested Table",
 	"publisher": "lengmo",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"engines": {
 		"vscode": "^1.53.0"
 	},
