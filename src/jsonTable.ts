@@ -86,6 +86,10 @@ export class JSONTable {
         if (partialJson instanceof Array) {
             let header: HeaderItem = partialHeader.getOrAddChild(prefix + ".*");
 
+            if (partialJson.length == 0) {
+                header.addAttr(".value");
+            }
+
             for (let json of partialJson) {
                 ret = Math.max(ret, this.buildHeader("", json, header) + 1);
             }
