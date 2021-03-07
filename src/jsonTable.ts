@@ -1,3 +1,5 @@
+import * as JSON5 from "json5"
+
 class HeaderItem {
     public index: number;
 
@@ -66,7 +68,7 @@ export class JSONTable {
     private divs: {rowSpan: number, data: string}[][];
 
     constructor(text: string) {
-        this.json = JSON.parse(text);
+        this.json = JSON5.parse(text);
         this.header = new HeaderItem(0);
         this.divs = [];
         this.maxHeaderDepth = this.buildHeader("", this.json, this.header);
