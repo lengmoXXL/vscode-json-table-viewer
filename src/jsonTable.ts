@@ -1,8 +1,6 @@
 import * as JSON5 from "json5"
 
 class HeaderItem {
-    public index: number;
-
     private _attrs: Set<string>;
     private _childs: Map<string, HeaderItem>;
     private _size: number;
@@ -13,7 +11,6 @@ class HeaderItem {
         this._childs = new Map();
         this._size = 0;
         this._level = level;
-        this.index = -1;
     }
 
     get attrs(): Set<string> {
@@ -65,7 +62,7 @@ export class JSONTable {
     private json: object;
     private header: HeaderItem;
     private maxHeaderDepth: number;
-    private divs: {rowSpan: number, data: string}[][];
+    private divs: {column: number, row: number, rowSpan: number, data: string}[];
 
     constructor(text: string) {
         this.json = JSON5.parse(text);
@@ -73,12 +70,7 @@ export class JSONTable {
         this.divs = [];
         this.maxHeaderDepth = this.buildHeader("", this.json, this.header);
         this.header.callSize();
-        this.expandDivs(this.header);
-
-        let maxBodySpan = this.getBodySpan(this.header, this.json);
-        this.fullFill(maxBodySpan);
-
-        // console.log(JSON.stringify(this.divs));
+        this.getBodySpan(this.header, this.json, this.maxHeaderDepth + 1, 1);
     }
 
     buildHeader(prefix: string, partialJson: object, partialHeader: HeaderItem): number {
@@ -101,17 +93,6 @@ export class JSONTable {
             partialHeader.addAttr(prefix + ".value");
         }
         return ret;
-    }
-
-    expandDivs(partialHeader: HeaderItem) {
-        partialHeader.index = this.divs.length;
-        for (let i = 0; i < partialHeader.attrs.size; ++ i) {
-            this.divs.push([]);
-        }
-
-        for (let [k, item] of partialHeader.children.entries()) {
-            this.expandDivs(item);
-        }
     }
 
     getByPath(path: string, json: any): object | undefined {
@@ -156,26 +137,36 @@ export class JSONTable {
         return ret;
     }
 
-    getBodySpan(partialHeader: HeaderItem, partialJson: object): number {
+    getBodySpan(partialHeader: HeaderItem, partialJson: object, rowBase: number, columnBase: number): number {
         let ret = 1;
+        let currentColumnBase = columnBase + partialHeader.attrs.size;
         for (let [k,item] of partialHeader.children.entries()) {
             let childJson = this.getByPath(k, partialJson);
             if (childJson && childJson instanceof Array) {
                 let update = 0;
                 for (let child of childJson) {
-                    update += this.getBodySpan(item, child);
+                    update += this.getBodySpan(item, child, rowBase + update, currentColumnBase);
                 }
                 ret = Math.max(ret, update);
             }
+            currentColumnBase += item.size;
         }
 
         let i = 0;
         for (let attr of partialHeader.attrs) {
             let value = this.getByPath(attr, partialJson);
             if (value) {
-                this.divs[partialHeader.index + i].push({rowSpan: ret, data: JSON.stringify(value)});
+                this.divs.push({
+                    row: rowBase,
+                    column: columnBase + i,
+                    rowSpan: ret,
+                    data: JSON.stringify(value)});
             } else {
-                this.divs[partialHeader.index + i].push({rowSpan: ret, data: ""});
+                this.divs.push({
+                    row: rowBase,
+                    column: columnBase + i,
+                    rowSpan: ret,
+                    data: ""});
             }
 
             ++ i;
@@ -184,29 +175,19 @@ export class JSONTable {
         return ret;
     }
 
-    fullFill(maxSpan: number) {
-        for (let col of this.divs) {
-            let span = maxSpan;
-            for (let cell of col) {
-                span -= cell.rowSpan;
-            }
-            if (span > 0) {
-                let lastCell = col.pop();
-                if (lastCell) {
-                    lastCell.rowSpan += span;
-                    col.push(lastCell);
-                }
-            }
-        }
-    }
-
     tableHeaderHTML(): string {
         let divs: string[] = [];
         let totalRowSpan = this.maxHeaderDepth;
-        let q: HeaderItem[] = [this.header];
+        let q: {index: number, item: HeaderItem}[] = [{index: 1, item: this.header}];
 
         while (q.length > 0) {
-            let header = q.shift();
+            let item = q.shift();
+            if (!item) {
+                break;
+            }
+
+            let header = item.item;
+            let index = item.index;
             if (!header) {
                 break;
             }
@@ -214,12 +195,14 @@ export class JSONTable {
             let rowSpan = totalRowSpan - header.level;
             
             for (let attr of header.attrs) {
-                divs.push(`<div class="table-header table-item" style="grid-column: span 1; grid-row: span ${rowSpan};">${attr}</div>`);
+                divs.push(`<div class="table-header table-item" style="grid-column: ${index} / span 1; grid-row: span ${rowSpan};">${attr}</div>`);
+                ++ index;
             }
 
             for (let [k, v] of header.children) {
-                divs.push(`<div class="table-header table-item" style="grid-column: span ${v.size}; grid-row: span 1;">${k}</div>`);
-                q.push(v);
+                divs.push(`<div class="table-header table-item" style="grid-column: ${index} / span ${v.size}; grid-row: span 1;">${k}</div>`);
+                q.push({index: index, item: v});
+                index += v.size;
             }
         }
 
@@ -228,14 +211,8 @@ export class JSONTable {
 
     tableBodyHTML(): string {
         let divStrings: string[] = [];
-        let index = 1;
-        for (let col of this.divs) {
-            let rowIndex = this.maxHeaderDepth + 1;
-            for (let cell of col) {
-                divStrings.push(`<div class="table-item" style="grid-column-start: ${index}; grid-row: ${rowIndex} / span ${cell.rowSpan};">${cell.data}</div>`)
-                rowIndex += cell.rowSpan;
-            }
-            ++ index;
+        for (let div of this.divs) {
+            divStrings.push(`<div class="table-item" style="grid-column-start: ${div.column}; grid-row: ${div.row} / span ${div.rowSpan};">${div.data}</div>`)
         }
 
         return divStrings.join("");
