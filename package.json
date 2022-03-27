@@ -20,7 +20,27 @@
 				"command": "json-table-viewer.OpenView",
 				"title": "JSON Table Viewer: Open View"
 			}
-		]
+		],
+		"configuration": {
+			"title": "JsonViewTable",
+			"properties": {
+				"json-table-viewer.item-light-style": {
+					"type": "string",
+					"default": "text-align: center; border-style: solid; border-width: .1px;",
+					"description": "css description of table item"
+				},
+				"json-table-viewer.item-dark-style": {
+					"type": "string",
+					"default": "text-align: center; border-style: solid; border-width: .1px;",
+					"description": "css description of table item"
+				},
+				"json-table-viewer.item-high-contrast-style": {
+					"type": "string",
+					"default": "text-align: center; border-style: solid; border-width: .1px;",
+					"description": "css description of table item"
+				}
+			}
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "yarn run compile",

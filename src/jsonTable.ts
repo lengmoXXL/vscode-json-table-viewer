@@ -1,4 +1,5 @@
 import * as JSON5 from "json5"
+import * as vscode from 'vscode';
 
 class HeaderItem {
     private _attrs: Set<string>;
@@ -223,7 +224,7 @@ export class JSONTable {
         <html>
             <header>
                 <title>JSON Table Viewer</title>
-                <style>
+                <style> 
                     .json-table {
                         display: grid;
                         grid-template-columns: repeat(` + this.header.size + `, 1fr);
@@ -231,14 +232,22 @@ export class JSONTable {
                         column-gap: 1px;
                     }
         
-                    .table-header {
+                    body .table-header {
                         font-weight: bold;
                     }
-        
-                    .table-item {
-                        text-align: center;
-                        background-color: antiquewhite;
+
+                    body.vscode-light .table-item {
+                        ` + this.getTableItemStyle("item-light-style") + `
                     }
+
+                    body.vscode-dark .table-item {
+                        ` + this.getTableItemStyle("item-dark-style") + `
+                    }
+
+                    body.vscode-high-contrast .table-item {
+                        ` + this.getTableItemStyle("item-high-contrast-style") + `
+                    }
+        
                 </style>
             </header>
             <body>
@@ -249,5 +258,16 @@ export class JSONTable {
             </body>
         
         </html>`;
+    }
+
+    getTableItemStyle(type: string): string {
+        const conf = vscode.workspace.getConfiguration("json-table-viewer");
+        if (conf) {
+            const style = conf.get<string>(type)
+            if (style) {
+                return style;
+            }
+        }
+        return 'text-align: center;';
     }
 }
