@@ -156,7 +156,7 @@ export class JSONTable {
         let i = 0;
         for (let attr of partialHeader.attrs) {
             let value = this.getByPath(attr, partialJson);
-            if (value) {
+            if (value || value === false) {
                 this.divs.push({
                     row: rowBase,
                     column: columnBase + i,
